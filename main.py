@@ -1,5 +1,6 @@
 import os
 from bitstring import BitArray
+import binascii
 
 class Trivium:
   def __init__(self):
@@ -39,16 +40,31 @@ class Trivium:
       keystream.append(self.gen_keystream())
       cnt += 1
     return keystream
-  
-  def encrypt(self, plaintext):
-    pass
 
-  def decrypt(self, ciphertext):
-    pass
-  
-# testing
+# encrypt
 trivium = Trivium()
-test_input = BitArray('0b111111111101010101010')
-keystream = BitArray(trivium.keystream(len(test_input)))
-test_output = test_input.__xor__(keystream)
-print(test_output)
+
+def encrypt(plaintext):
+  keystream = BitArray(trivium.keystream(len(plaintext)))
+  return keystream ^ plaintext
+
+def decrypt(ciphertext):
+  keystream = BitArray(trivium.keystream(len(ciphertext)))
+  return keystream ^ ciphertext
+
+def file_to_binary_string(file_path):
+  with open(file_path, 'rb') as file:
+    binary_code = file.read()  
+  return BitArray(bytes=binary_code)
+
+def process_dir(dir):
+  for filename in os.listdir(dir):
+    f = os.path.join(dir, filename)
+    if os.path.isfile(f):
+      pass
+
+if __name__ == '__main__':
+  bin_str = file_to_binary_string('test_data/ptt5')
+  keystream = BitArray(trivium.keystream(len(bin_str)))
+  with open('encrypted_data/ptt5.txt', 'w') as file:
+    file.write(keystream.__xor__(bin_str).bin)
