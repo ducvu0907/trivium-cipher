@@ -1,6 +1,5 @@
-import os
+import os, time
 from bitstring import BitArray
-import binascii
 
 class Trivium:
   def __init__(self):
@@ -8,10 +7,12 @@ class Trivium:
     self.gen_random_key_iv(80)
     self.loading()
     
+  # generate key and IV
   def gen_random_key_iv(self, length):
     self.key = BitArray(bytes=os.urandom(length // 8))
     self.iv = BitArray(bytes=os.urandom(length // 8))
 
+  # initialize the cipher
   def loading(self):
     self.state = BitArray(length=288)
     self.state[:80] = self.key
@@ -20,6 +21,7 @@ class Trivium:
     for _ in range(4 * 288):
       self.gen_keystream()
     
+  # generate keystream
   def gen_keystream(self):
     t1 = self.state[65] ^ self.state[92]
     t2 = self.state[161] ^ self.state[176]
@@ -34,6 +36,7 @@ class Trivium:
     self.state[177] = t2
     return output_bit
   
+  # keystream to xor with the message
   def keystream(self, msglen):
     cnt, keystream = 0, []
     while cnt < msglen:
@@ -41,8 +44,10 @@ class Trivium:
       cnt += 1
     return keystream
 
-# encrypt
+# encrypt files
 trivium = Trivium()
+output_time = []
+key, iv = trivium.key, trivium.iv
 
 def encrypt(plaintext):
   keystream = BitArray(trivium.keystream(len(plaintext)))
@@ -52,19 +57,30 @@ def decrypt(ciphertext):
   keystream = BitArray(trivium.keystream(len(ciphertext)))
   return keystream ^ ciphertext
 
+# convert files
 def file_to_binary_string(file_path):
   with open(file_path, 'rb') as file:
     binary_code = file.read()  
   return BitArray(bytes=binary_code)
 
+# loop and encrypt files in the folder
 def process_dir(dir):
   for filename in os.listdir(dir):
     f = os.path.join(dir, filename)
     if os.path.isfile(f):
-      pass
+      start_time = time.time()
+      plaintext = file_to_binary_string(f)
+      ciphertext = encrypt(plaintext)
+      elapsed_time = "{:.4f}".format(time.time() - start_time)
+      output_filename = os.path.splitext(filename)[0] + '_encrypted.txt'
+      output_file_path = os.path.join('encrypted_data', output_filename)
+      with open(output_file_path, 'w') as output_file:
+        output_file.write(ciphertext.bin)
+      output_time.append((output_filename, elapsed_time))
 
 if __name__ == '__main__':
-  bin_str = file_to_binary_string('test_data/ptt5')
-  keystream = BitArray(trivium.keystream(len(bin_str)))
-  with open('encrypted_data/ptt5.txt', 'w') as file:
-    file.write(keystream.__xor__(bin_str).bin)
+  process_dir('test_data')
+  with open('report.txt', 'a') as file:
+    for rep in output_time:
+      file.write(f'{rep[0]}: {rep[1]}s\n')
+    file.write(f'Key: {key}\nIV: {iv}')

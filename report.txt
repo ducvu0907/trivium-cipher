@@ -1,0 +1,20 @@
+Key: 0x62caa5156fe9cdb1340c
+IV: 0x6af5740d83a9fe46f0ae
+
+# time log
+alice29_encrypted.txt: 21.3215s
+asyoulik_encrypted.txt: 17.9973s
+bible_encrypted.txt: 576.9076s
+cantrbry_encrypted.txt: 106.5428s
+cp_encrypted.txt: 3.5170s
+E_encrypted.txt: 675.3892s
+fields_encrypted.txt: 1.6412s
+grammar_encrypted.txt: 0.5392s
+kennedy_encrypted.txt: 144.4674s
+large_encrypted.txt: 464.0416s
+lcet10_encrypted.txt: 59.2490s
+plrabn12_encrypted.txt: 68.2054s
+ptt5_encrypted.txt: 72.1270s
+sum_encrypted.txt: 5.3742s
+world192_encrypted.txt: 346.9189s
+xargs_encrypted.txt: 0.5953s
